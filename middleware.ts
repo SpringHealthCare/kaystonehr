@@ -9,7 +9,12 @@ const publicPaths = [
   "/_next",
   "/favicon.ico",
   "/images",
-  "/assets"
+  "/assets",
+  "/unauthorized",
+  "/test-auth",
+  "/api/webhook",
+  "/api/health",
+  "/api/status"
 ]
 
 export function middleware(request: NextRequest) {
@@ -30,7 +35,9 @@ export function middleware(request: NextRequest) {
       return NextResponse.next()
     }
     // For all other protected routes, redirect to sign-in
-    return NextResponse.redirect(new URL("/auth/sign-in", request.url))
+    const signInUrl = new URL("/auth/sign-in", request.url)
+    signInUrl.searchParams.set("callbackUrl", pathname)
+    return NextResponse.redirect(signInUrl)
   }
 
   // Allow access to all other routes
