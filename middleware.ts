@@ -2,19 +2,29 @@ import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
 // Add paths that don't require authentication
-const publicPaths = ["/auth/sign-in", "/auth/sign-up"]
+const publicPaths = [
+  "/auth/sign-in",
+  "/auth/sign-up",
+  "/api/auth",
+  "/_next",
+  "/favicon.ico",
+  "/images",
+  "/assets"
+]
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
-  const authToken = request.headers.get('Authorization')?.split('Bearer ')[1]
 
   // Allow access to public paths regardless of authentication status
-  if (publicPaths.includes(pathname)) {
+  if (publicPaths.some(path => pathname.startsWith(path))) {
     return NextResponse.next()
   }
 
+  // Check for session cookie
+  const session = request.cookies.get('session')
+
   // If user is not authenticated and trying to access protected routes
-  if (!authToken) {
+  if (!session) {
     // If trying to access root path, allow it (the page will handle redirection)
     if (pathname === "/") {
       return NextResponse.next()
